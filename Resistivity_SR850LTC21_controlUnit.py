@@ -16,7 +16,7 @@ import matplotlib.animation as animation    ## for realtime data plot
 from matplotlib import style     ## for nice graph
 
 ## Module that control the SR850 and LTC21 and taking data
-import SR850LTC21_measure_V5 as MEAsure
+import SR850LTC21_measure as MEAsure
 ## Module for a global stop measurement flag
 import GlobalFlag
 
@@ -421,7 +421,7 @@ class MyFrame(wx.Frame):
         
         filedic=directory+'\\'+filename
                 
-        ## Use SR850LTC21_measrue_V5 for performing measruements, used threading
+        ## Use SR850LTC21_measrue for performing measruements, used threading
         MEAsure.sr850ltc21(filename = filedic,
                            trange=trange,
                            SR850scanlength = float(self.sr850control1input.GetValue()),
