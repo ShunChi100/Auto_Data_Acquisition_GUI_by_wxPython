@@ -7,3 +7,5 @@ This GUI is writen by Python, extensively employing wxPython, PyVisa, and matplo
 
 The following is a screen shot of the GUI:
 
+![alt tag](https://cloud.githubusercontent.com/assets/10473229/13136021/c0bb3ab2-d5ca-11e5-94a9-133a976e8369.png)
+
