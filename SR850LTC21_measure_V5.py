@@ -7,7 +7,7 @@ from threading import Thread
 from wx.lib.pubsub import setuparg1
 from wx.lib.pubsub import pub as Publisher
 
-import settings
+import GlobalFlag
 
 class sr850ltc21(Thread):
     def __init__(self,filename,trange,SR850scanlength,SR850SinRMS,CurrentResistance,GainRatio,dT,dTfluc,description,WaitTimeForT):
@@ -78,7 +78,7 @@ class sr850ltc21(Thread):
         self.tstablemean = 0
         self.tstablestd = 1
         
-        settings.init()
+        GlobalFlag.init()
         
         self.start()
         
@@ -86,10 +86,10 @@ class sr850ltc21(Thread):
     ## acquire data   
     def run(self):
 
-        if settings.stopFlag == False:
+        if GlobalFlag.stopFlag == False:
             pass
         elif self.trange.size == 0:
-            if settings.stopFlag == False:
+            if GlobalFlag.stopFlag == False:
                     pass 
             else:
                 time.sleep(self.WaitTimeForT)
@@ -153,8 +153,8 @@ class sr850ltc21(Thread):
 
             for tset in self.trange:
                 
-                #print(settings.stopFlag)
-                if settings.stopFlag == False:
+                #print(GlobalFlag.stopFlag)
+                if GlobalFlag.stopFlag == False:
                     break
                 
                 ltcStatus = self.ltc21.query("QISTATE?\n;")
@@ -187,14 +187,14 @@ class sr850ltc21(Thread):
                     if counttime > 120:
                         T_stable_flag = 0
                         break
-                    if settings.stopFlag == False:
+                    if GlobalFlag.stopFlag == False:
                         T_stable_flag = 2
                         break
                 else:
                     T_stable_flag = 1 
                     
                     
-                if settings.stopFlag == False:
+                if GlobalFlag.stopFlag == False:
                     pass 
                 else:
                     #################################################

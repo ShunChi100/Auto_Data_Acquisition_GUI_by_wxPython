@@ -18,7 +18,7 @@ from matplotlib import style     ## for nice graph
 ## Module that control the SR850 and LTC21 and taking data
 import SR850LTC21_measure_V5 as MEAsure
 ## Module for a global stop measurement flag
-import settings
+import GlobalFlag
 
 # Create a Gui frame, derived from the wxPython Frame.
 class MyFrame(wx.Frame):
@@ -151,7 +151,7 @@ class MyFrame(wx.Frame):
         Publisher.subscribe(self.updateDisplay, "update")        
         
         # initialize the global stop flag
-        settings.init()
+        GlobalFlag.init()
         ####################################        
 
         
@@ -459,7 +459,7 @@ class MyFrame(wx.Frame):
         """
         Setting the stopFlag for stopping for loop in the running thread
         """
-        settings.stopFlag = False
+        GlobalFlag.stopFlag = False
         self.statusMeasureinput.SetValue("Stopping! Could be a minute!")
       
          
