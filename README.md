@@ -6,4 +6,4 @@ The instruments are SR850 Lock-in Amplifier and LTC21 Temperature Controller. An
 This GUI is writen by Python, extensively employing wxPython, PyVisa, and matplotlib. 
 
 The following is a screen shot of the GUI:
-![alt tag](https://www.dropbox.com/s/hqlubevejyi8gua/GUI_ScreenShot.png?dl=0)
+
