@@ -85,70 +85,81 @@ class sr850ltc21(Thread):
         
     ## acquire data   
     def run(self):
-
         if GlobalFlag.stopFlag == False:
+            #print "pass right at the beginning"
             pass
         elif self.trange.size == 0:
             if GlobalFlag.stopFlag == False:
-                    pass 
+                #print "trange.size = 0"
+                pass 
             else:
-                time.sleep(self.WaitTimeForT)
-                #################################################
-                #########SR850 measureing unit###################
-                ## reset trace and start scan
-                self.sr850.write("REST;STRT\n;")
-                tstable1 = np.zeros(100) 
-                tstable2 = np.zeros(100) 
-                ## get average T from ltc21
-                wx.CallAfter(Publisher.sendMessage, "update", msg = "M") ## "M" means "Measuring R and T"
-                T_read_flag1 = 1.0
-                T_read_flag2 = 1.0
-                ## During SR850 scan, keep query Temperature data from LTC21 and then average them 
-                for ii in range(0,100):
-                    tmp1 = self.ltc21.query("QSAMP?1\n;")
-                    #See if LTC21 display a value or "......", if the later, tstable1[ii] = -1.0, T_read_flag1 = 0.0
-                    if tmp1[0] != ".":
-                        tstable1[ii] = float(tmp1[0:-3])
-                    else:
-                        tstable1[ii] = -1.0
-                        T_read_flag1 = 0.0 
-                    tmp2 = self.ltc21.query("QSAMP?2\n;")
-                    if tmp2[0] != ".":
-                        tstable2[ii] = float(tmp2[0:-3])
-                    else:
-                        tstable2[ii] = -1.0
-                        T_read_flag2 = 0.0
-                    time.sleep(self.SR850scanlength/105)    
-                            
-                ## See if LTC21 display a value or "......", if the later, tstd and tmean are set to be -1
-                if T_read_flag1 == 1.0: 
-                    tstd1 = np.std(tstable1)
-                    tmean1 = np.mean(tstable1) 
-                elif T_read_flag1 == 0.0:
-                    tstd1 = -1.0
-                    tmean1 = -1.0   
+                ## set ltc21 to MONitor mode
+                self.ltc21.write("SMON\n;") 
+                for ii in range(0,10000):
+                    if GlobalFlag.stopFlag == False:
+                        #print("break Cooling scan")
+                        break
+                
+                    time.sleep(self.WaitTimeForT)
+                    #################################################
+                    #########SR850 measureing unit###################
+                    ## reset trace and start scan
+                    self.sr850.write("REST;STRT\n;")
                     
-                if T_read_flag2 == 1.0: 
-                    tstd2 = np.std(tstable2)
-                    tmean2 = np.mean(tstable2) 
-                elif T_read_flag2 == 0.0:
-                    tstd2 = -1.0
-                    tmean2 = -1.0   
-                
-                
-                ## Statistically analyze the data within i = 0(%) and j = 100(%) from the left edge.
-                self.sr850.write("STAT0,100\n;")
-                time.sleep(1.5)
-                #print(time.time(), time.clock())  
-                ## Query the Statistical results mean (0), standard dev (1), total (2) or delta time (3).
-                V = float(self.sr850.query("SPAR?0\n"))
-                Vstd = float(self.sr850.query("SPAR?1\n"))
-                R = V/self.SR850Current
-                Rstd = Vstd/self.SR850Current
-                #print(time.time(), time.clock())  
-        
-                ## write data to file
-                self.file.write("%.1f,\t %.3f,\t %.6e,\t %.6e,\t %.3f,\t %.3f,\t %.3f,\t %.6e,\t %.3f,\t %.0f\n" % (time.clock(), tmean2, R, Rstd, tstd2, tmean1, tstd1, V, tset,T_stable_flag))
+                    tstable1 = np.zeros(100) 
+                    tstable2 = np.zeros(100) 
+                    ## get average T from ltc21
+                    wx.CallAfter(Publisher.sendMessage, "update", msg = "M") ## "M" means "Measuring R and T"
+                    T_read_flag1 = 1.0
+                    T_read_flag2 = 1.0
+                    ## During SR850 scan, keep query Temperature data from LTC21 and then average them 
+                    for ii in range(0,100):
+                        tmp1 = self.ltc21.query("QSAMP?1\n;")
+                        #See if LTC21 display a value or "......", if the later, tstable1[ii] = -1.0, T_read_flag1 = 0.0
+                        if tmp1[0] != ".":
+                            tstable1[ii] = float(tmp1[0:-3])
+                        else:
+                            tstable1[ii] = -1.0
+                            T_read_flag1 = 0.0 
+                        tmp2 = self.ltc21.query("QSAMP?2\n;")
+                        if tmp2[0] != ".":
+                            tstable2[ii] = float(tmp2[0:-3])
+                        else:
+                            tstable2[ii] = -1.0
+                            T_read_flag2 = 0.0
+                        time.sleep(self.SR850scanlength/105)    
+                                
+                    ## See if LTC21 display a value or "......", if the later, tstd and tmean are set to be -1
+                    if T_read_flag1 == 1.0: 
+                        tstd1 = np.std(tstable1)
+                        tmean1 = np.mean(tstable1) 
+                    elif T_read_flag1 == 0.0:
+                        tstd1 = -1.0
+                        tmean1 = -1.0   
+                        
+                    if T_read_flag2 == 1.0: 
+                        tstd2 = np.std(tstable2)
+                        tmean2 = np.mean(tstable2) 
+                    elif T_read_flag2 == 0.0:
+                        tstd2 = -1.0
+                        tmean2 = -1.0   
+                    
+                    self.sr850.write("ASCL\n;")
+                    ## Statistically analyze the data within i = 0(%) and j = 100(%) from the left edge.
+                    self.sr850.write("STAT0,100\n;")
+                    time.sleep(1.5)
+                    #print(time.time(), time.clock())  
+                    ## Query the Statistical results mean (0), standard dev (1), total (2) or delta time (3).
+                    V = float(self.sr850.query("SPAR?0\n"))
+                    Vstd = float(self.sr850.query("SPAR?1\n"))
+                    R = V/self.SR850Current
+                    Rstd = Vstd/self.SR850Current
+                    #print(time.time(), time.clock())  
+            
+                    ## write data to file
+                    tset = -1
+                    T_stable_flag = -1
+                    self.file.write("%.1f,\t %.3f,\t %.6e,\t %.6e,\t %.3f,\t %.3f,\t %.3f,\t %.6e,\t %.3f,\t %.0f\n" % (time.clock(), tmean2, R, Rstd, tstd2, tmean1, tstd1, V, tset,T_stable_flag))
         else:
 
             for tset in self.trange:
@@ -169,7 +180,8 @@ class sr850ltc21(Thread):
                 self.ltc21.write("SETP1,%.3f\n;" %tset)
                 time.sleep(self.WaitTimeForT)
                 
-                tstabletest = np.zeros(100)
+                tstabletest1 = np.zeros(100)
+                tstabletest2 = np.zeros(100)
                 tstable1 = np.zeros(100) 
                 tstable2 = np.zeros(100) 
                 
@@ -178,11 +190,13 @@ class sr850ltc21(Thread):
                 while abs(self.tstablemean-tset) > self.dT or self.tstablestd > self.dTfluc :
                     wx.CallAfter(Publisher.sendMessage, "update", msg = "A") ## "A" means "Attempting to stablize T"               
                     for ii in range(0,100):
-                        tmp = self.ltc21.query("QSAMP?2\n;")
-                        tstabletest[ii] = float(tmp[0:-3])
-                        time.sleep(0.09)
-                    self.tstablestd = np.std(tstabletest)
-                    self.tstablemean = np.mean(tstabletest)
+                        tmp1 = self.ltc21.query("QSAMP?1\n;")
+                        tmp2 = self.ltc21.query("QSAMP?2\n;")
+                        tstabletest1[ii] = float(tmp1[0:-3])
+                        tstabletest2[ii] = float(tmp2[0:-3])
+                        time.sleep(0.08)
+                    self.tstablestd = np.std(tstabletest2)
+                    self.tstablemean = np.mean(tstabletest1)
                     counttime += 1
                     if counttime > 120:
                         T_stable_flag = 0
@@ -238,7 +252,7 @@ class sr850ltc21(Thread):
                         tstd2 = -1.0
                         tmean2 = -1.0   
                     
-                    
+                    self.sr850.write("ASCL\n;")
                     ## Statistically analyze the data within i = 0(%) and j = 100(%) from the left edge.
                     self.sr850.write("STAT0,100\n;")
                     time.sleep(1.5)
@@ -255,8 +269,7 @@ class sr850ltc21(Thread):
 
             ## write a data end indicator
             self.file.write("######\n")
-            ## Send message for finishing
-            wx.CallAfter(Publisher.sendMessage, "update", msg = "Measurement finished!")        
+                 
         
         ## set ltc21 to MONitor mode
         self.ltc21.write("SMON\n;") 
@@ -270,7 +283,8 @@ class sr850ltc21(Thread):
         self.sr850.close()
         self.ltc21.close()
         time.sleep(1) 
-            
+        ## Send message for finishing
+        wx.CallAfter(Publisher.sendMessage, "update", msg = "Measurement finished!")   
 
 
         

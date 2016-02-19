@@ -353,8 +353,8 @@ class MyFrame(wx.Frame):
     #########################################################
     def measurebutton(self, event):
         ## Get Temperature Setting Values
-        if self.tStartval2.GetValue() == 'N' or self.tEndval2.GetValue() == 'N' or self.tDividenval2.GetValue() == 'N':
-            trange2 = np.empty( 0 )
+        if self.tStartval.GetValue() == 'N' or self.tEndval.GetValue() == 'N' or self.tDividenval.GetValue() == 'N':
+            trange1 = np.empty( 0 )
         else:
             Ts1 = float(self.tStartval.GetValue())
             Te1 = float(self.tEndval.GetValue())
@@ -427,7 +427,7 @@ class MyFrame(wx.Frame):
                            SR850scanlength = float(self.sr850control1input.GetValue()),
                            SR850SinRMS = float(self.sr850control2input.GetValue()),
                            CurrentResistance = float(self.sr850control3input.GetValue())*1000.0,
-                           GainRatio =  float(self.sr850control6input.GetValue),
+                           GainRatio =  float(self.sr850control6input.GetValue()),
                            dT = float(self.sr850control4input.GetValue()),
                            dTfluc = float(self.sr850control5input.GetValue()),
                            description = self.description.GetValue(),
